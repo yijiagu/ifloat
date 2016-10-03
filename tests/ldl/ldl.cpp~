@@ -1,0 +1,85 @@
+/*
+*   LDL-t ALGORITHM 6.5
+*
+*   To factor the positive definite n by n matrix A into LDL**T,
+*   where L is a lower triangular matrix with ones along the diagonal
+*   and D is a diagonal matrix with positive entries on the
+*   diagonal.
+*
+*   INPUT:   the dimension n; entries A(I,J), 1<=I, J<=n of A.
+*
+*   OUTPUT:  the entries L(I,J), 1<=J<I, 1<=I<=N of L and D(I),
+*            1<=I<=n of D.
+*/
+
+#include<stdio.h>
+#include<math.h>
+
+#include "Random.h"
+
+#define true 1
+#define false 0
+
+#include <InstableFloat.h>
+#include <InstableEnv.h>
+
+void INPUT(int *, double [][11], int *);
+void OUTPUT(int, double *, double [][11]);
+
+int main()
+{
+  //double A[10][11];
+  //double S;
+  int N,I,J,K,OK;
+
+  //INPUT(&OK, A, &N);
+  OK = 1;
+
+  int RANDOM_SEED = 101010;
+  N = 10;
+  Random R = new_Random_seed(RANDOM_SEED);
+  double **A_float = RandomMatrix(N, N, R);
+  //double result = 0.0;
+  InstableFloat A[10][10];
+  for(int i = 0; i < N; i ++){
+    for(int j = 0; j < N; j ++){
+      A[i][j] = A_float[i][j];
+    }
+  }
+
+  InstableFloat D[10],V[10];
+  
+  if (OK) {
+    /* STEP 1 */
+    for (I=1; I<=N; I++) { 
+      /* STEP 2 */
+      for (J=1; J<=I-1; J++)
+	V[J-1] = A[I-1][J-1] * D[J-1];
+      /* STEP 3 */
+      D[I-1] = A[I-1][I-1];
+      for (J=1; J<=I-1; J++){
+	InstableEnv::open_label(1);
+	D[I-1] = D[I-1] - A[I-1][J-1] * V[J-1];
+	InstableEnv::close_label();
+      }
+      /* STEP 4 */
+      for (J=I+1; J<=N; J++) {
+	for (K=1; K<=I-1; K++){
+	  InstableEnv::open_label(2);
+	  A[J-1][I-1] = A[J-1][I-1] - A[J-1][K-1] * V[K-1];
+	  InstableEnv::close_label();
+	}
+	A[J-1][I-1] = A[J-1][I-1] / D[I-1];
+      }  
+    }  
+    /* STEP 5 */
+    //OUTPUT(N, D, A);
+    std::cout << A[1][8] << std::endl;
+  }
+
+  
+  return 0;
+}
+
+
+

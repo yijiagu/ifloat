@@ -1,0 +1,71 @@
+#include "../InstableFloat.h"
+#include "../InstableEnv.h"
+//Dot Product 3-Vectors
+InstableFloat dot3(InstableFloat *a, InstableFloat *b){     
+  InstableFloat r;
+  r = a[0] * b[0] + a[1] * b[1] 
+  + a[2] * b[2];
+  return r;
+}
+
+int raySphere(InstableFloat *r, InstableFloat *s, InstableFloat radiusSq) {
+  InstableFloat A, B, C, D;
+  //InstableFloat temp0, temp1, temp2, temp3, temp4, temp5, temp6, temp7, temp8;
+  InstableEnv::open_label(1);
+  A = dot3(r,r);
+  InstableEnv::close_label();
+
+  InstableEnv::open_label(2);
+  B = -2.0 * dot3(s,r);
+  InstableEnv::close_label();
+  // temp0 = s[0] * r[0];
+  // temp1 = s[1] * r[1];
+  // temp2 = s[2] * r[2];
+  // InstableEnv::open_label(2);
+  // temp3 = temp0 + temp1 + temp2;
+  // InstableEnv::close_label();
+  //B = -2.0 * temp3;
+
+  InstableEnv::open_label(3);
+  C = dot3(s,s) - radiusSq;
+  InstableEnv::close_label();
+
+  // temp4 = s[0] * s[0];
+  // temp5 = s[1] * s[1];
+  // temp6 = s[2] * s[2];
+  // InstableEnv::open_label(3);
+  // temp7 = temp4 + temp5 + temp6;
+  // InstableEnv::close_label();
+  // temp8 = temp7 + temp6;
+  // C = temp7 - radiusSq;
+  
+  InstableEnv::open_label(4);
+  D = B*B - 4*A*C;
+  InstableEnv::close_label();
+  return 0;
+} 
+
+int main() {
+
+  InstableFloat s[3] = {-10.4194345474,	-15,	-14};
+  InstableFloat r[3] = { -10.998046875,	-16,	-15};
+  InstableFloat radiusSq (0.015625);
+  return raySphere(r, s, radiusSq);
+    /*
+  InstableFloat s[3] = {-41.2500114441,	-55.0000000000, -54.0178222656};
+  InstableFloat r[3] = {-41.9998855591, -56.0000000000, -55.0000000000};
+  InstableFloat radiusSq (0.0000000149);*/
+
+  /*  
+  InstableFloat s[3] = {3.044401884078979 -15.000000000000000 -14.000000000000000};
+  InstableFloat r[3] = {3.380001068115234 -16.000000000000000 -15.000000000000000};
+  InstableFloat radiusSq (0.015625000000000);
+
+  
+
+  
+  InstableFloat s[3] = {2.265014410018921, -13.25600, -12.02222};
+  InstableFloat r[3] = {2.630004882812500, -14.0123, -13.009908};
+  InstableFloat radiusSq (0.031250000000000);*/
+
+} 

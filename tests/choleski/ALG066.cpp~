@@ -1,0 +1,167 @@
+/*
+*   CHOLESKI'S ALGORITHM 6.6
+*
+*   To factor the positive definite n by n matrix A into LL**T,
+*   where L is lower triangular.
+*
+*   INPUT:   the dimension n; entries A(I,J), 1<=I, J<=n of A.
+*
+*   OUTPUT:  the entries L(I,J), 1<=J<=I, 1<=I<=n of L.
+*
+*   the entries of U = L**T are U(I,J) = L(J,I), I<=J<=n, 1<=I<=n
+*/
+
+#include<stdio.h>
+//#include<math.h>
+
+#include <Random.h> 
+#include <InstableFloat.h>
+#include <InstableEnv.h>
+#include <InstableMath.h>
+
+#define true 1
+#define false 0
+
+void INPUT(FILE *, double [][10]);
+void OUTPUT(int, double [][10]);
+
+int main()
+{
+  //double A[10][10];
+  //double S;
+  int N,I,J,K,NN,JJ,KK;
+  FILE *INP;
+  char NAME[30];
+  printf("Input the file name in the form - drive:name.ext\n");
+  printf("for example:   A:DATA.DTA\n");
+  scanf("%s", NAME);
+  INP = fopen(NAME, "r");
+
+  N = 8;
+   //INPUT(&OK, A, &N);
+   //if (OK) {
+      /* STEP 1 */
+   for(int i = 0; i < 10; i ++){
+     //Random R = new_Random_seed(RANDOM_SEED[i]);
+     //double **A_float = RandomMatrix(N, N, R);
+     double A_float[10][10];
+     
+     INPUT(INP, A_float);
+
+     std::cout << "enter " << std::endl;
+     
+     InstableFloat A[N][N];
+     InstableFloat S;
+     
+     for(int i = 0; i < N; i ++){
+       for(int j = 0; j < N; j ++){
+	 A[i][j] = A_float[i][j];
+       }
+     }
+     
+      A[0][0] = sqrt(A[0][0]);
+      /* STEP 2 */
+      for (J=2; J<=N; J++)
+	A[J-1][0] = A[J-1][0] / A[0][0];
+      /* STEP 3 */
+      NN = N - 1;
+      for (I=2; I<=NN; I++) {
+         /* STEP 4 */
+         KK = I - 1;
+         S = 0.0;
+         for (K=1; K<=KK; K++){
+	   InstableEnv::open_label(1);
+	   S = S - A[I-1][K-1] * A[I-1][K-1];
+	   InstableEnv::close_label();	   
+	 }
+	 InstableFloat temp;
+	 temp = A[I-1][I-1] + S;
+         A[I-1][I-1] = sqrt(temp);
+         /* STEP 5 */
+         JJ = I + 1;
+         for (J=JJ; J<=N; J++) {
+            S = 0.0;
+            KK = I - 1;
+            for (K=1; K<=KK; K++){
+	      InstableEnv::open_label(2);
+	      S = S - A[J-1][K-1] * A[I-1][K-1];
+	      InstableEnv::close_label();
+	    }
+	    InstableFloat temp2;
+	    temp2 = A[J-1][I-1] + S;
+            A[J-1][I-1] = temp2 / A[I-1][I-1]; 
+         }  
+      }
+      /* STEP 6 */
+      S = 0.0;
+      for (K=1; K<=NN; K++){
+	InstableEnv::open_label(3);
+	S = S - A[N-1][K-1] * A[N-1][K-1];
+	InstableEnv::close_label();
+      }
+      InstableFloat temp3;
+      temp3 = A[N-1][N-1] + S;
+      A[N-1][N-1] = sqrt(temp3);
+      
+      /* STEP 7 */
+      //OUTPUT(N, A);
+      //}
+      float bound_width = 0;
+      InstableFloat r = A[0][0];
+      int row, column;
+      for (I=1; I<=N; I++) {
+	for (J=1; J<=I; J++){
+	  FP_Interval v_bound = A[I-1][J-1].getVolatileBound();
+	  if(v_bound.upper() - v_bound.lower() > bound_width){
+	    row = I-1;
+	    column = J-1;
+	    r = A[I-1][J-1];
+	    bound_width = v_bound.upper() - v_bound.lower();
+	  }
+	}
+      }
+      std::cout << row << column << std::endl;
+      std::cout << r << std::endl;
+      //Random_delete(R);
+      //free(A_float);
+   }
+   fclose(INP);
+   return 0;
+}
+
+void INPUT(FILE *INP, double A[][10])
+{
+   int I, J;
+   for (I=1; I<=8; I++) {
+     for (J=1; J<=8; J++) fscanf(INP, "%lf", &A[I-1][J-1]);
+     fscanf(INP, "\n");
+   }
+}
+
+
+void OUTPUT(int N, double A[][10])
+{
+   int I, J, FLAG;
+   char NAME[30];
+   FILE *OUP;
+
+   printf("Choice of output method:\n");
+   printf("1. Output to screen\n");
+   printf("2. Output to text file\n");
+   printf("Please enter 1 or 2.\n");
+   scanf("%d", &FLAG);
+   if (FLAG == 2) {
+      printf("Input the file name in the form - drive:name.ext\n");
+      printf("for example:   A:OUTPUT.DTA\n");
+      scanf("%s", NAME);
+      OUP = fopen(NAME, "w");
+   }
+   else OUP = stdout;
+   fprintf(OUP, "CHOLESKI FACTORIZATION\n\n");
+   fprintf(OUP, "The matrix L output by rows:\n");
+   for (I=1; I<=N; I++) {
+      for (J=1; J<=I; J++) fprintf(OUP, "  %12.8f", A[I-1][J-1]);
+      fprintf(OUP, "\n");
+   }
+   fclose(OUP);
+}

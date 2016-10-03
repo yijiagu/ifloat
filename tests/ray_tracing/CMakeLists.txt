@@ -1,0 +1,34 @@
+
+
+set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR})
+
+if (test)
+
+  ##############
+  # Unit Tests
+  ##############
+  add_executable(raytracingTests test_raytracing.cpp)
+
+  # Standard linking to gtest stuff.
+  target_link_libraries(raytracingTests gtest gtest_main)
+
+  # Extra linking for the project.
+  target_link_libraries(raytracingTests ${PROJECT_BINARY_DIR}/libinstableFloat.a mpfr ppl gmpxx gmp)
+
+  # This is so you can do 'make test' to see all your tests run, instead of
+  # manually running the executable runUnitTests to see those specific tests.
+  add_test(NAME that-test-I-made COMMAND raytracingTests)
+
+else()
+  add_executable(ray_instable ray_tracing_simplify.cpp)
+
+  target_compile_features(ray_instable PRIVATE cxx_range_for)
+
+  target_link_libraries(ray_instable  ${PROJECT_BINARY_DIR}/libinstableFloat.a mpfr ppl gmpxx gmp)
+
+endif()
+
+
+
+
+

@@ -1,0 +1,11 @@
+include_directories(${PROJECT_SOURCE_DIR}/lib/include)
+
+set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR})
+
+add_executable(ldl_instable ../Random.cpp ldl.cpp)
+add_executable(fldl ../Random.cpp fldl.cpp)
+
+target_compile_features(ldl_instable PRIVATE cxx_range_for)
+target_compile_features(fldl PRIVATE cxx_range_for)
+
+target_link_libraries(ldl_instable ${PROJECT_BINARY_DIR}/libinstableFloat.a mpfr ppl gmpxx gmp)

@@ -1,0 +1,97 @@
+
+//#include "SOR.h"
+#include <stdio.h>
+#include "Random.h" 
+#include "../InstableFloat.h"
+double SOR_num_flops(int M, int N, int num_iterations)
+{
+  double Md = (double) M;
+  double Nd = (double) N;
+  double num_iterD = (double) num_iterations;
+
+  return (Md-1)*(Nd-1)*num_iterD*6.0;
+}
+
+void SOR_execute(int M, int N, double omega, InstableFloat G[][100], int 
+		 num_iterations)
+{
+
+  double omega_over_four = omega * 0.25;
+  double one_minus_omega = 1.0 - omega;
+
+  /* update interior points */
+
+  int Mm1 = M-1;
+  int Nm1 = N-1; 
+  int p;
+  int i;
+  int j;
+  InstableFloat *Gi;
+  InstableFloat *Gim1;
+  InstableFloat *Gip1;
+
+  for (p=0; p<num_iterations; p++){
+    for (i=1; i<Mm1; i++){
+      Gi = G[i];
+      Gim1 = G[i-1];
+      Gip1 = G[i+1];
+      for (j=1; j<Nm1; j++){
+	InstableFloat temp;
+	InstableFloat::open_label(0);
+	temp  = Gim1[j] + Gip1[j] + Gi[j-1] + Gi[j+1];
+	InstableFloat::close_label();
+	
+	InstableFloat::open_label(1);
+	Gi[j] = omega_over_four * temp + one_minus_omega * Gi[j];
+	InstableFloat::close_label();
+      }
+    }		
+  }
+}
+     
+int main(){
+  int RANDOM_SEED = 101010;
+  int N = 100;
+  Random R = new_Random_seed(RANDOM_SEED);
+  double **G = RandomMatrix(N, N, R);
+  //double result = 0.0;
+  InstableFloat InstableG[100][100];
+  for(int i = 0; i < N; i ++){
+    for(int j = 0; j < N; j ++){
+      InstableG[i][j] = G[i][j];
+    }
+  }
+  //Stopwatch Q = new_Stopwatch();
+  int cycles=1;
+  // for(int i = 0; i < 5; i ++){
+    //Stopwatch_start(Q);
+  SOR_execute(N, N, 1.25, InstableG, cycles);
+    //Stopwatch_stop(Q);
+      //if (Stopwatch_read(Q) >= min_time) break;
+    //cycles *= 2;
+    //}
+
+ 
+  //int l[2];
+  for(int i = 0; i < N; i ++){
+    for(int j = 0; j < N; j ++){
+      FP_Interval fo_bound = InstableG[i][j].getFreeOrderBound();
+      cout << std::fixed << std::setprecision(17)
+	   << fo_bound.upper() - fo_bound.lower() << endl;
+
+      //l[InstableG[i][j].getMaxErrorLabel()] ++;
+    }
+  }
+
+  //cout << "Counts of max error hits: " << endl
+  //     << "label 0 " << l[0] << endl
+  //     << "label 1 " << l[1] << endl;
+    
+
+  /* approx Mflops */
+
+  //result = SOR_num_flops(N, N, cycles) / Stopwatch_read(Q) * 1.0e-6;
+  //Stopwatch_delete(Q);
+  //Array2D_double_delete(N, N, G);
+  //return resul;t
+}       
